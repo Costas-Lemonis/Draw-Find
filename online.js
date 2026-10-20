@@ -51,19 +51,17 @@ addEventListener('beforeunload',()=>{ try{net&&net.close()}catch(e){} });
 // ---------- Μενού online ----------
 function onlineMenu(){
   myName = myName || pick(SOLO_NAMES,1)[0];
-  show(`<h2>Online</h2><p>Ο ένας φτιάχνει δωμάτιο και οι άλλοι μπαίνουν με τον κωδικό ή τον σύνδεσμο.</p>
-  <div class="card"><input type="text" id="on" maxlength="16" placeholder="Το όνομά σου" value="${esc(myName)}">
-  <button class="main" onclick="olHost()">Δημιούργησε δωμάτιο</button>
-  <input type="text" id="oc" maxlength="4" placeholder="Κωδικός δωματίου" style="text-transform:uppercase">
-  <button onclick="olJoin()">Μπες σε δωμάτιο</button></div>
-  <button onclick="modePanel()">Πίσω</button>`);
+  show(`<h2>Online</h2><p class="sub">Ο ένας φτιάχνει δωμάτιο και οι άλλοι μπαίνουν με τον κωδικό ή τον σύνδεσμο.</p>
+  <div class="card"><input type="text" id="on" maxlength="16" placeholder="Το όνομά σου" value="${esc(myName)}">${btn('Δημιούργησε δωμάτιο','olHost()')}</div>
+  <div class="card"><input type="text" id="oc" maxlength="4" placeholder="Κωδικός δωματίου" style="text-transform:uppercase">${btn('Μπες σε δωμάτιο','olJoin()')}</div>
+  <div class="nav col">${btn('Πίσω','modePanel()','gr')}</div>`);
 }
 function joinFromLink(code){ onlineMenu(); $('#oc').value=code; }
 const readName = () => { myName=($('#on').value.trim()||pick(SOLO_NAMES,1)[0]).slice(0,16); };
 function netError(e){
   olCleanup();
   const t={ 'peer-unavailable':'Δεν βρέθηκε δωμάτιο με αυτόν τον κωδικό.', cdn:'Δεν φορτώθηκε η βιβλιοθήκη για online. Έλεγξε τη σύνδεσή σου.', timeout:'Η σύνδεση άργησε πολύ. Δοκίμασε ξανά.' }[e&&e.type] || 'Δεν έγινε η σύνδεση. Δοκίμασε ξανά.';
-  show(`<h2>Ωχ!</h2><p>${t}</p><button class="main" onclick="onlineMenu()">Πίσω</button>`);
+  show(`<h2>Ωχ!</h2><p class="sub">${t}</p><div class="nav col">${btn('Πίσω','onlineMenu()')}</div>`);
 }
 function olCleanup(){ if(R){clearInterval(R.h);clearTimeout(R.h2)} try{net&&net.close()}catch(e){} net=null; isHost=false; R=null; C={players:[]}; window.onSeg=window.onClear=null; timer.stop(); }
 function olExit(){ olCleanup(); menu(); }
@@ -103,7 +101,7 @@ function hostLeft(id){
 }
 function hostStart(){
   if(R.players.length<2) return;
-  S.drawTime=R.settings.time; S.cats=R.settings.cats.length?R.settings.cats:Object.keys(WORDS); used=new Set();
+  S.drawTime=R.settings.time; S.cats=[...R.settings.cats];   // κενό = όλες οι κατηγορίες used=new Set();
   R.started=true; R.queue=R.players.map(p=>p.id); R.total=R.queue.length; R.round=0;
   nextRound();
 }
@@ -174,24 +172,24 @@ function lobbyView(){
   const link=location.origin+location.pathname+'?'+(BC?'bc&':'')+'room='+C.code;
   const set=C.settings||{time:30,cats:[]};
   show(`<h2>Δωμάτιο ${esc(C.code)}</h2>
-  <div class="card"><p>Στείλε αυτόν τον σύνδεσμο στους φίλους σου:</p><input type="text" readonly value="${esc(link)}" onclick="this.select()">
+  <div class="card"><p class="sub">Στείλε αυτόν τον σύνδεσμο στους φίλους σου:</p><input type="text" class="plain" readonly value="${esc(link)}" onclick="this.select()">
   <button class="sm" onclick="navigator.clipboard&&navigator.clipboard.writeText('${esc(link)}')">Αντιγραφή</button></div>
-  <div class="card"><p>Παίκτες (${C.players.length}/${MAX_PLAYERS})</p>${C.players.map(p=>`<div class="entry"><span>${esc(p.name)}${p.id==='host'?' ⭐':''}${p.id===myId?' (εσύ)':''}</span></div>`).join('')}</div>
-  ${isHost?`<div class="card"><p>Χρόνος γύρου</p><div class="row">${[30,40,60].map(t=>`<button class="opt ${set.time===t?'on':''}" onclick="olSettings('time',${t})">${t} δευτ</button>`).join('')}</div>
-  <p>Κατηγορίες</p><div class="row">${Object.keys(WORDS).map(c=>`<button class="opt ${set.cats.includes(c)?'on':''}" onclick="olSettings('cat','${c}')">${c}</button>`).join('')}</div></div>
-  <button class="main" ${C.players.length<2?'disabled':''} onclick="hostStart()">${C.players.length<2?'Περιμένουμε παίκτες…':'Ξεκίνα'}</button>`
-  :`<p>Περιμένουμε τον οικοδεσπότη να ξεκινήσει…</p>`}
-  <button onclick="olExit()">Έξοδος</button>`);
+  <p class="sub">Παίκτες (${C.players.length}/${MAX_PLAYERS})</p>
+  <div class="list">${C.players.map(p=>`<div class="entry"><span>${esc(p.name)}${p.id==='host'?' ⭐':''}${p.id===myId?' (εσύ)':''}</span></div>`).join('')}</div>
+  ${isHost?`<p class="sub">Χρόνος γύρου</p><div class="times">${[30,40,60].map(t=>`<button class="tb ${set.time===t?'on':''}" onclick="olSettings('time',${t})">${t} δευτ</button>`).join('')}</div>
+  <p class="sub">Κατηγορίες (αν δεν διαλέξεις καμία, παίζουν όλες)</p><div class="tiles">${['Ζώα','Οχήματα','Αντικείμενα','Φαγητά'].map(c=>`<div class="tile ${set.cats.includes(c)?'on':''}" onclick="olSettings('cat','${c}')"><img src="${ICONS[c]}" alt="">${c}</div>`).join('')}</div>
+  <div class="nav">${btn('Έξοδος','olExit()','gr')}<button class="bl" ${C.players.length<2?'disabled':''} onclick="hostStart()">${C.players.length<2?'Περιμένουμε…':'Ξεκίνα'}</button></div>`
+  :`<p class="sub">Περιμένουμε τον οικοδεσπότη να ξεκινήσει…</p><div class="nav col">${btn('Έξοδος','olExit()','gr')}</div>`}`);
 }
 function roundView(m){
   C.painter=m.painter; C.players=m.players; C.left=m.total; C.word=''; $('#ov')?.remove();
   const me=isPainter();
-  show(`<div class="top"><button class="sm" onclick="olExit()">Έξοδος</button><span class="timer" id="tm"></span><span>Γύρος ${m.i}/${m.n}</span></div>
-  <p>${me?'Σειρά σου! Ζωγράφισε: <b id="ow">…</b>':`${esc(m.painterName)} ζωγραφίζει…`}</p>
-  <div class="board"><canvas id="cv" width="1024" height="640"></canvas></div>
-  ${me?`<div id="tools">${toolbar()}</div><button class="main" onclick="olSend({t:'done'})">Ολοκλήρωση γύρου</button>`
-  :`<input type="text" id="gi" placeholder="Γράψε την απάντηση σου" autocomplete="off"><div class="fb" id="fb"></div><button class="main" onclick="olGuess()">Μάντεψε</button>`}
-  <div class="card" id="sb"></div><div class="card" id="log" style="max-height:120px;overflow:auto"></div>`);
+  show(`<div class="play"><div class="hd"><span class="rd">Γύρος ${m.i}/${m.n}</span><span class="timer" id="tm"></span><button class="pb" onclick="olExit()">Εξοδος</button></div>
+  <div class="board"><canvas id="cv" width="1024" height="728"></canvas></div>
+  <div class="ctl"><p class="sub">${me?'Σειρά σου! Ζωγράφισε: <b id="ow">…</b>':`${esc(m.painterName)} ζωγραφίζει…`}</p>
+  ${me?`<div class="tools" id="tools">${toolbar()}</div>${btn('Ολοκλήρωση γύρου',"olSend({t:'done'})",'gr wide')}`
+  :`<div class="fb" id="fb"></div><div class="rr">${btn('Υποβολή','olGuess()','ye')}</div><input type="text" class="plain" id="gi" placeholder="Γράψε την απάντηση σου..." autocomplete="off">`}
+  <div id="sb" style="display:flex;flex-direction:column;gap:6px"></div><div class="sub" id="log" style="max-height:90px;overflow:auto"></div></div></div>`,'wide');
   if(me){ initCanvas(); window.onSeg=s=>olSend(s); window.onClear=()=>olSend({t:'clear'}); }
   else { window.onSeg=window.onClear=null; $('#gi').addEventListener('keydown',e=>{ if(e.key==='Enter') olGuess(); }); }
   tickView(); sbView();
@@ -205,12 +203,12 @@ function sbView(){ const e=$('#sb'); if(e) e.innerHTML=scoreRows(C.players); }
 function logLine(h){ const l=$('#log'); if(l){ l.insertAdjacentHTML('afterbegin',`<div>${h}</div>`); } }
 function endView(m){
   const o=document.createElement('div'); o.className='ov'; o.id='ov';
-  o.innerHTML=`<div class="card" style="max-width:420px"><h2>Η λέξη ήταν: ${esc(m.word)}</h2>${scoreRows(m.players)}<p>Ο επόμενος γύρος ξεκινά σε λίγο…</p></div>`;
+  o.innerHTML=`<div class="card" style="gap:8px"><h2>Η λέξη ήταν: ${esc(m.word)}</h2>${scoreRows(m.players)}<p class="sub">Ο επόμενος γύρος ξεκινά σε λίγο…</p></div>`;
   document.body.appendChild(o);
 }
 function finalView(){
   window.onSeg=window.onClear=null; $('#ov')?.remove();
-  show(`<h2>Τέλος παιχνιδιού!</h2><div class="card">${scoreRows(C.players)}</div><button class="main" onclick="olExit()">Πίσω στο μενού</button>`);
+  show(`<h2>Τέλος παιχνιδιού!</h2><div class="list">${scoreRows(C.players)}</div><div class="nav col">${btn('Πίσω στο μενού','olExit()')}</div>`);
 }
 // Άνοιγμα από σύνδεσμο ?room=ΚΩΔΙΚΟΣ
 { const room=new URLSearchParams(location.search).get('room'); if(room) joinFromLink(room.toUpperCase().slice(0,4)); }
