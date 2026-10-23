@@ -70,9 +70,11 @@ function modePanel(){
 }
 function offlineModes(){
   show(`<h2>Offline</h2><p class="sub">Διαλεξε τον τροπο παιχνιδιου.</p>
-  <div class="card"><h3>Ζωγράφισε τη λέξη</h3><p class="sub">Ένας παίκτης ζωγραφίζει τη λέξη και μετά δίνει τη συσκευή στους υπόλοιπους για να τη βρουν.</p>${btn('Ξεκίνα','soloSetup1()')}</div>
-  <div class="card"><h3>Λεξομαχία 60΄΄</h3><p class="sub">Ένας παίκτης βλέπει μια κρυφή λέξη, τη ζωγραφίζει, και η ομάδα του πρέπει να βρει τις περισσότερες μέσα σε 1 λεπτό.</p>${btn('Ξεκίνα','teamSetup1()')}</div>
-  <div class="nav col">${btn('Πίσω','modePanel()','gr')}</div>`);
+  <div class="duo">
+    <div class="card"><h3>Ζωγράφισε τη λέξη</h3><p class="sub">Ένας παίκτης ζωγραφίζει τη λέξη και μετά δίνει τη συσκευή στους υπόλοιπους για να τη βρουν.</p>${btn('Ξεκίνα','soloSetup1()')}</div>
+    <div class="card"><h3>Λεξομαχία 60΄΄</h3><p class="sub">Ένας παίκτης βλέπει μια κρυφή λέξη, τη ζωγραφίζει, και η ομάδα του πρέπει να βρει τις περισσότερες μέσα σε 1 λεπτό.</p>${btn('Ξεκίνα','teamSetup1()')}</div>
+  </div>
+  <div class="nav col">${btn('Πίσω','modePanel()','gr')}</div>`,'duoscr');
 }
 function instructions(){
   show(`<h2>Οδηγίες Παιχνιδιού</h2>
