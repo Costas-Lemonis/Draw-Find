@@ -1,7 +1,8 @@
 'use strict';
 // ====== Δεδομένα (από τα ScriptableObjects του Unity: λέξη + δυσκολία 30/40/60) ======
-const WORDS = {"Αντικείμενα": [["Κούπα", 30], ["Μολύβι", 30], ["Κλειδί", 30], ["Βιβλίο", 30], ["Ρολόι", 40], ["Ψαλίδι", 40], ["Καρέκλα", 40], ["Λάμπα", 40], ["Τηλεσκόπιο", 60], ["Πυξίδα", 60], ["Ανεμιστήρας", 60], ["Ραπτομηχανή", 60]], "Φαγητά": [["Μήλο", 30], ["Πίτσα", 30], ["Ψωμί", 30], ["Παγωτό", 30], ["Σουβλάκι", 40], ["Κρουασάν", 40], ["Σαλάτα", 40], ["Κέικ", 40]], "Οχήματα": [["Αυτοκίνητο", 30], ["Ποδήλατο", 30], ["Βάρκα", 30], ["Τρένο", 30], ["Αεροπλάνο", 40], ["Ελικόπτερο", 40], ["Πλοίο", 40], ["Τρακτέρ", 40], ["Διαστημόπλοιο", 60], ["Υποβρύχιο", 60], ["Αερόστατο", 60], ["Φόρμουλα", 60]], "Ζώα": [["Σκύλος", 30], ["Γάτα", 30], ["Ψάρι", 30], ["Πουλί", 30], ["Αλεπού", 40], ["Χελώνα", 40], ["Πάνθηρας", 40], ["Πιγκουίνος", 40], ["Χταπόδι", 60], ["Καμηλοπάρδαλη", 60], ["Ιπποπόταμος", 60], ["Χαμαιλέοντας", 60]]};
-const ICONS = {'Οχήματα':'assets/oximata.png','Ζώα':'assets/zoa.png','Αντικείμενα':'assets/zoa.png','Φαγητά':'assets/zoa.png'}; // όπως στο παιχνίδι: τα 'Αντικείμενα' και 'Φαγητά' έχουν το ίδιο εικονίδιο με τα 'Ζώα'
+const ICONS = {'Οχήματα':'assets/oximata.png','Ζώα':'assets/zoa.png','Αντικείμενα':'assets/zoa.png','Φαγητά':'assets/zoa.png', // όπως στο Unity
+  'Φύση':'🌳','Επαγγέλματα':'🧑‍🍳','Σπίτι':'🏠','Ρούχα':'👕','Αθλήματα':'⚽','Μουσική':'🎵','Τόποι':'🏰','Σώμα':'🖐️','Γιορτές':'🎈','Φαντασία':'🐉'};
+const iconHtml = c => { const i=ICONS[c]; return !i ? '' : i.endsWith('.png') ? `<img src="${i}" alt="">` : `<span class="ic">${i}</span>`; };
 const SOLO_NAMES = ['Μουντζούρης','Πινέλας','Σκιτσάκιας','Χρωμάκιας','Μουτζούρα','Σκιτσόλυκος','ΠινέλοΜάστορας','Γραμμούλης','Σβηστήρας','Καμβάς','Σχεδιάκιας','Μουντζουχτής','ΧρωμοΝίντζα','ΣκιτσοΠιτ','ΜικρόΠινέλο','ΣκιτσοΜάγος','ΧρωμοΛύκος','ΜουντζουΡάκος','ΠινέλοΚινγκ','ΣκιτσοΦάντασμα'];
 const TEAM_NAMES = ['Κόκκινοι Πινέλες','Μπλε Σκιτσάκηδες','ΧρωμοΝίντζα','ΜουντζουροΛύκοι','ΣκιτσοΜάγοι','ΠινέλοΚινγκς','ΧρωματοΦαντάσματα','ΣκιτσοΔράκοι','ΜουντζουΡάκοι','ΠινέλοΤάγμα','ΣκιτσοΦλόγες','ΧρωμοΤίγρεις','ΜουντζουΧαμός','ΠινέλοΣμήνος','ΣκιτσοΚεραυνοί'];
 const TEAM_TIME = 60;                 // TeamRoundTimer: 60 δευτ.
@@ -45,7 +46,7 @@ const timer = {t:0,total:0,run:false,h:0,cb:null,sel:'#tm',
 
 
 // ====== Βοηθητικά UI ======
-function show(html,cls=''){ document.body.classList.toggle('bluebg',cls.includes('bluescr')); app.innerHTML=`<div class="scr ${cls}">${html}</div>`; window.scrollTo(0,0); }
+function show(html,cls=''){ document.body.classList.toggle('bluebg',cls.includes('bluescr')); document.body.classList.toggle('nofit',cls.includes('lobbyscr')); app.innerHTML=`<div class="scr ${cls}">${html}</div>`; window.scrollTo(0,0); }
 const btn = (label,fn,cls='bl') => `<button class="${cls}" onclick="${fn}">${label}</button>`;
 const nav = (back,next,nl='Επόμενο') => `<div class="nav">${btn('Πίσω',back,'gr')}${btn(nl,next,'bl')}</div>`;
 const pb = () => `<button class="pb" onclick="openPause()">Παυση</button>`;
@@ -104,11 +105,11 @@ function soloSetup2(){
 }
 function tiles(mode){
   const cats=Object.keys(WORDS), all=cats.every(c=>S.cats.includes(c));
-  const t=(k,label,ic,on)=>`<div class="tile ${on?'on':''}" onclick="toggleCat('${k}','${mode}')">${ic?`<img src="${ic}" alt="">`:''}${label}</div>`;
-  return `<div class="tiles">${t('*','Όλα','',all)}${['Ζώα','Οχήματα','Αντικείμενα','Φαγητά'].map(c=>t(c,c,ICONS[c],S.cats.includes(c))).join('')}</div>`;
+  const t=(k,on)=>`<div class="tile ${on?'on':''}" onclick="toggleCat('${k}','${mode}')">${k==='*'?'':iconHtml(k)}${k==='*'?'Όλα':k}</div>`;
+  return `<div class="tiles">${t('*',all)}${cats.map(c=>t(c,S.cats.includes(c))).join('')}</div>`;
 }
 const catHead = `<h2>Κατηγορίες λέξεων</h2><p class="sub">Διάλεξε τις κατηγορίες από τις οποίες θες να εμφανίζονται λέξεις. Αν δεν διαλέξεις καμία, θα εμφανίζονται λέξεις από όλες.</p>`;
-function catSetup(mode){ show(`${catHead}${tiles('solo')}${nav('soloSetup2()','startSolo()','Παίξε')}`); }
+function catSetup(mode){ show(`${catHead}${tiles('solo')}${nav('soloSetup2()','startSolo()','Παίξε')}`,'catscr'); }
 function toggleCat(c,mode){
   const cats=Object.keys(WORDS);
   if(c==='*') S.cats=cats.every(x=>S.cats.includes(x))?[]:[...cats];
@@ -118,7 +119,7 @@ function toggleCat(c,mode){
 function teamSetup1(){
   S.mode='team';
   show(`<h2>Αριθμός ομάδων</h2><p class="sub">Διαλεξε τον αριθμο των παιχτων/ομαδων που θα παιξουν (2-20).</p>${countPanel('tc',S.teams)}
-  ${catHead}${tiles('team')}${nav('offlineModes()','teamNames()')}`);
+  ${catHead}${tiles('team')}${nav('offlineModes()','teamNames()')}`,'catscr');
 }
 function teamNames(){
   show(`<h2>Ονόματα ομάδων</h2><p class="sub">Βάλε τα ονόματα που θες ή και όχι... τότε θα δοθούν τυχαία ονόματα.</p>
@@ -128,10 +129,12 @@ function teamNames(){
 
 // ====== Εργαλεία ζωγραφικής ======
 const tool = {eraser:false, color:'#000', r:15};
+const SIZES=[6,15,32], DOTS=['.45em','.8em','1.25em'];   // μικρό / μεσαίο / μεγάλο πινέλο
 function toolbar(){
-  return `<button class="sm ${!tool.eraser?'on':''}" onclick="setTool('brush')">Μολύβι</button><button class="sm ${tool.eraser?'on':''}" onclick="setTool('eraser')">Σβήστρα</button><button class="sm" onclick="clearCanvas()">Καθάρισμα</button>`;
+  return `<button class="sm ${!tool.eraser?'on':''}" onclick="setTool('brush')">Μολύβι</button><button class="sm ${tool.eraser?'on':''}" onclick="setTool('eraser')">Σβήστρα</button><button class="sm" onclick="clearCanvas()">Καθάρισμα</button>
+  <div class="sizes">${SIZES.map((r,i)=>`<button class="sm size ${tool.r===r?'on':''}" onclick="setTool('size',${r})" aria-label="Μέγεθος ${i+1}"><i class="dot" style="--d:${DOTS[i]}"></i></button>`).join('')}</div>`;
 }
-function setTool(k){ tool.eraser=(k==='eraser'); const t=$('#tools'); if(t) t.innerHTML=toolbar(); }
+function setTool(k,v){ if(k==='size') tool.r=v; else tool.eraser=(k==='eraser'); const t=$('#tools'); if(t) t.innerHTML=toolbar(); }
 
 // ====== Καμβάς ζωγραφικής ======
 function drawSeg(x,s){ // ένα κομμάτι γραμμής (χρησιμοποιείται και για τη ζωντανή μετάδοση online)

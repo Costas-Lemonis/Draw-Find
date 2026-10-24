@@ -221,38 +221,40 @@ function clientMsg(m){
 }
 const isPainter = () => C.painter===myId;
 const tickView = () => { const t=$('#tm'); if(!t) return; const s=Math.max(0,C.left); t.textContent=pad(s/60|0)+':'+pad(s%60); };
+function copyLink(btn){
+  const link=location.origin+location.pathname+'?'+(BC?'bc&':'')+'room='+C.code;
+  try{ navigator.clipboard.writeText(link); }catch(e){}
+  btn.textContent='Αντιγράφηκε!'; setTimeout(()=>{ btn.textContent='Αντιγραφή συνδέσμου'; },1500);
+}
 function lobbyView(){
   window.onSeg=window.onClear=null; $('#ov')?.remove();
-  const link=location.origin+location.pathname+'?'+(BC?'bc&':'')+'room='+C.code;
-  const set=C.settings||{mode:'solo',time:30,cats:[],teams:2,rounds:2}, team=set.mode==='team';
-  const entry=p=>`<div class="entry"><span>${esc(p.name)}${p.id==='host'?' ⭐':''}${p.id===myId?' (εσύ)':''}</span></div>`;
+  const set=C.settings||{mode:'solo',time:30,cats:[],teams:2,rounds:2}, team=set.mode==='team', ro=isHost?'':' ro';
+  const entry=p=>`<div class="entry ${p.id==='host'?'':'grey'}"><span>${esc(p.name)}${p.id==='host'?' ⭐':''}${p.id===myId?' (εσύ)':''}</span></div>`;
   const names=C.teamNames||[];
   const list=team ? Array.from({length:set.teams},(_,t)=>`<p class="sub"><b>${esc(names[t]||'Ομάδα '+(t+1))}</b></p>`+(C.players.filter(p=>p.team===t).map(entry).join('')||'<p class="sub">—</p>')).join('')
                   : C.players.map(entry).join('');
-  const ok=!team||teamsOk(C.players,set.teams), opt=(k,v,label,on)=>`<button class="tb ${on?'on':''}" onclick="olSettings('${k}',${typeof v==='number'?v:`'${v}'`})">${label}</button>`;
-  const modeName={solo:'Ζωγράφισε τη λέξη',team:'Λεξομαχία 60΄΄'}[set.mode];
-  show(`<h2>Δωμάτιο</h2>
-  <div class="cols lob">
-    <div class="colx">
-      <div class="card"><p class="sub">Κωδικός δωματίου</p><div class="code">${esc(C.code)}</div>
-        <p class="sub">Στείλε αυτόν τον σύνδεσμο στους φίλους σου:</p><input type="text" class="plain" readonly value="${esc(link)}" onclick="this.select()">
-        <button class="sm" onclick="navigator.clipboard&&navigator.clipboard.writeText('${esc(link)}')">Αντιγραφή</button></div>
+  const ok=!team||teamsOk(C.players,set.teams);
+  const opt=(k,v,label,on)=>`<button class="tb ${on?'on':''}" onclick="olSettings('${k}',${typeof v==='number'?v:`'${v}'`})">${label}</button>`;
+  show(`<div class="lobby">
+    <div class="ltop">
+      <div class="lwait">${isHost?'':'Περιμένουμε τον οικοδεσπότη να ξεκινήσει…'}</div>
+      <div class="lhead"><h2>Δωμάτιο</h2>
+        <div class="lmode"><p class="sub">Τρόπος παιχνιδιού</p><div class="times${ro}">${opt('mode','solo','Ζωγράφισε τη λέξη',!team)}${opt('mode','team','Λεξομαχία 60΄΄',team)}</div></div></div>
+      <div class="lcode"><p class="sub">Κωδικός δωματίου</p><div class="code">${esc(C.code)}</div><button class="sm" onclick="copyLink(this)">Αντιγραφή συνδέσμου</button></div>
     </div>
-    <div class="colx">
-      <p class="sub">Τρόπος παιχνιδιού</p>
-      ${isHost?`<div class="times">${opt('mode','solo','Ζωγράφισε τη λέξη',!team)}${opt('mode','team','Λεξομαχία 60΄΄',team)}</div>`:`<p><b>${modeName}</b></p>`}
-      <p class="sub">Παίκτες (${C.players.length}/${MAX_PLAYERS})</p>
+    <div class="lset${ro}">
+      ${team?`<div class="pair"><div><p class="sub">Ομάδες</p><div class="times">${[2,3,4].map(n=>opt('teams',n,n,set.teams===n)).join('')}</div></div>
+        <div><p class="sub">Γύροι</p><div class="times">${[1,2,3].map(n=>opt('rounds',n,n,set.rounds===n)).join('')}</div></div></div>`
+        :`<p class="sub">Χρόνος γύρου</p><div class="times">${[30,40,60].map(t=>opt('time',t,t+' δευτ',set.time===t)).join('')}</div>`}
+      <p class="sub">Κατηγορίες (αν δεν διαλέξεις καμία, παίζουν όλες)</p>
+      <div class="tiles">${Object.keys(WORDS).map(c=>`<div class="tile ${set.cats.includes(c)?'on':''}" onclick="olSettings('cat','${c}')">${iconHtml(c)}${c}</div>`).join('')}</div>
+    </div>
+    <div class="lplay"><p class="sub">Παίκτες (${C.players.length}/${MAX_PLAYERS})</p>
       <div class="list">${list}</div>
       ${team?`<button class="sm" onclick="olSwitchTeam()">Άλλαξε ομάδα</button>`:''}
-      ${isHost?(team?`<p class="sub">Ομάδες</p><div class="times">${[2,3,4].map(n=>opt('teams',n,n,set.teams===n)).join('')}</div>
-        <p class="sub">Γύροι (πόσες φορές παίζει κάθε ομάδα)</p><div class="times">${[1,2,3].map(n=>opt('rounds',n,n,set.rounds===n)).join('')}</div>`
-        :`<p class="sub">Χρόνος γύρου</p><div class="times">${[30,40,60].map(t=>opt('time',t,t+' δευτ',set.time===t)).join('')}</div>`)+
-      `<p class="sub">Κατηγορίες (αν δεν διαλέξεις καμία, παίζουν όλες)</p><div class="tiles">${['Ζώα','Οχήματα','Αντικείμενα','Φαγητά'].map(c=>`<div class="tile ${set.cats.includes(c)?'on':''}" onclick="olSettings('cat','${c}')"><img src="${ICONS[c]}" alt="">${c}</div>`).join('')}</div>`:''}
-    </div>
-  </div>
-  ${ok?'':`<p class="sub" style="color:var(--red)">Κάθε ομάδα χρειάζεται τουλάχιστον 2 παίκτες.</p>`}
-  ${isHost?`<div class="nav">${btn('Έξοδος','olExit()','gr')}<button class="bl" ${C.players.length<2||!ok?'disabled':''} onclick="hostStart()">${C.players.length<2?'Περιμένουμε…':'Ξεκίνα'}</button></div>`
-  :`<p class="sub">Περιμένουμε τον οικοδεσπότη να ξεκινήσει…</p><div class="nav col">${btn('Έξοδος','olExit()','gr')}</div>`}`,'colsscr');
+      ${ok?'':`<p class="sub warn">Κάθε ομάδα χρειάζεται τουλάχιστον 2 παίκτες.</p>`}</div>
+    <div class="lnav nav">${btn('Έξοδος','olExit()','gr')}${isHost?`<button class="bl" ${C.players.length<2||!ok?'disabled':''} onclick="hostStart()">${C.players.length<2?'Περιμένουμε…':'Ξεκίνα'}</button>`:`<button class="bl" disabled>Περιμένουμε…</button>`}</div>
+  </div>`,'lobbyscr');
 }
 function roundView(m){
   C.painter=m.painter; C.players=m.players; C.left=m.total; C.word=''; $('#ov')?.remove();
