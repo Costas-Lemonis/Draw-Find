@@ -189,3 +189,16 @@ body.nofit #app{height:100dvh;min-height:0;align-items:stretch;overflow:hidden}
   .lplay .entry{font-size:1.2em}
   .lcode .code{font-size:2.4em}
 }
+
+/* ομάδες στο lobby */
+.tteam{display:flex;flex-direction:column;gap:.1em;margin-bottom:.4em}
+.thead{display:flex;align-items:center;justify-content:space-between;gap:.5em}
+.tname{flex:1;text-align:left;font-weight:400;padding-left:.3em}
+.lplay input.tn{flex:1;min-width:0;font-size:.8em;text-align:left;border-width:.7em;border-image-width:.7em;padding:0 .3em .15em}
+.lplay .thead .sm{flex:none}
+.lplay .tteam .entry{font-size:1em}
+@media(min-width:900px) and (min-height:520px){.lplay .tteam .entry{font-size:1.1em}}
+
+/* χρώματα πινέλου */
+button.sw{display:inline-flex;align-items:center;justify-content:center;min-width:2.4em;padding-top:.15em}
+.dot{border:.08em solid rgba(0,0,0,.45)}

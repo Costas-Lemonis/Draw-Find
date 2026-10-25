@@ -3,7 +3,7 @@
 const ICONS = {'Οχήματα':'assets/oximata.png','Ζώα':'assets/zoa.png','Αντικείμενα':'assets/zoa.png','Φαγητά':'assets/zoa.png', // όπως στο Unity
   'Φύση':'🌳','Επαγγέλματα':'🧑‍🍳','Σπίτι':'🏠','Ρούχα':'👕','Αθλήματα':'⚽','Μουσική':'🎵','Τόποι':'🏰','Σώμα':'🖐️','Γιορτές':'🎈','Φαντασία':'🐉'};
 const iconHtml = c => { const i=ICONS[c]; return !i ? '' : i.endsWith('.png') ? `<img src="${i}" alt="">` : `<span class="ic">${i}</span>`; };
-const SOLO_NAMES = ['Μουντζούρης','Πινέλας','Σκιτσάκιας','Χρωμάκιας','Μουτζούρα','Σκιτσόλυκος','ΠινέλοΜάστορας','Γραμμούλης','Σβηστήρας','Καμβάς','Σχεδιάκιας','Μουντζουχτής','ΧρωμοΝίντζα','ΣκιτσοΠιτ','ΜικρόΠινέλο','ΣκιτσοΜάγος','ΧρωμοΛύκος','ΜουντζουΡάκος','ΠινέλοΚινγκ','ΣκιτσοΦάντασμα'];
+const SOLO_NAMES = ['Μουντζούρης','Πινελάκιας','Σκιτσάκιας','Χρωμάκιας','Μουντζούρα','Σκιτσόλυκος','ΠινέλοΜάστορας','Γραμμούλης','Σβηστήρας','Καμβάς','Σχεδιάκιας','Μουντζουχτής','ΧρωμοΝίντζα','ΣκιτσοΠιτ','ΜικρόΠινέλο','ΣκιτσοΜάγος','ΧρωμοΛύκος','ΜουντζουΡάκος','ΠινέλοΚινγκ','ΣκιτσοΦάντασμα'];
 const TEAM_NAMES = ['Κόκκινοι Πινέλες','Μπλε Σκιτσάκηδες','ΧρωμοΝίντζα','ΜουντζουροΛύκοι','ΣκιτσοΜάγοι','ΠινέλοΚινγκς','ΧρωματοΦαντάσματα','ΣκιτσοΔράκοι','ΜουντζουΡάκοι','ΠινέλοΤάγμα','ΣκιτσοΦλόγες','ΧρωμοΤίγρεις','ΜουντζουΧαμός','ΠινέλοΣμήνος','ΣκιτσοΚεραυνοί'];
 const TEAM_TIME = 60;                 // TeamRoundTimer: 60 δευτ.
 const BASE = 80, FIRST_BONUS = 40, MAX_PTS = 300, PAINTER_PTS = 1; // ScoreManager
@@ -49,11 +49,11 @@ const timer = {t:0,total:0,run:false,h:0,cb:null,sel:'#tm',
 function show(html,cls=''){ document.body.classList.toggle('bluebg',cls.includes('bluescr')); document.body.classList.toggle('nofit',cls.includes('lobbyscr')); app.innerHTML=`<div class="scr ${cls}">${html}</div>`; window.scrollTo(0,0); }
 const btn = (label,fn,cls='bl') => `<button class="${cls}" onclick="${fn}">${label}</button>`;
 const nav = (back,next,nl='Επόμενο') => `<div class="nav">${btn('Πίσω',back,'gr')}${btn(nl,next,'bl')}</div>`;
-const pb = () => `<button class="pb" onclick="openPause()">Παυση</button>`;
+const pb = () => `<button class="pb" onclick="openPause()">Παύση</button>`;
 const countPanel = (id,v) => `<div class="count"><button class="pm minus" aria-label="−" onclick="step('${id}',-1)"></button><span id="${id}">${v}</span><button class="pm" aria-label="+" onclick="step('${id}',1)"></button></div>`;
 function step(id,d){ const k=id==='pc'?'players':'teams'; S[k]=Math.min(20,Math.max(2,S[k]+d)); $('#'+id).textContent=S[k]; }
 function setTime(t){ S.drawTime=S.guessTime=t; document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',parseInt(b.textContent)===t)); }
-const timeBoxes = () => `<div class="times">${[30,40,60].map(t=>`<button class="tb ${S.drawTime===t?'on':''}" onclick="setTime(${t})">${t} δευτ</button>`).join('')}</div>`;
+const timeBoxes = () => `<div class="times">${[30,40,60].map(t=>`<button class="tb ${S.drawTime===t?'on':''}" onclick="setTime(${t})">${t} δευτ.</button>`).join('')}</div>`;
 
 // ====== Μενού ======
 function menu(){
@@ -62,7 +62,7 @@ function menu(){
   <div class="nav col">${btn('Παίξε','modePanel()')}${btn('Οδηγίες','instructions()')}</div>`);
 }
 function modePanel(){
-  show(`<h2>Τρόποι παιχνιδιού</h2><p class="sub">Διαλεξε τι θες να παιξεις, μπορεις να παιξεις και ατομικα και σε ομαδες.</p>
+  show(`<h2>Τρόποι παιχνιδιού</h2><p class="sub">Διάλεξε τι θες να παίξεις. Μπορείς να παίξεις και ατομικά και σε ομάδες.</p>
   <div class="duo">
     <div class="card"><h3>Offline</h3><p class="sub">Παίξτε όλοι μαζί στην ίδια συσκευή, ατομικά ή σε ομάδες.</p>${btn('Παίξε offline','offlineModes()')}</div>
     <div class="card"><h3>Online</h3><p class="sub">Παίξε με φίλους από οπουδήποτε, ο καθένας από τη δική του συσκευή.</p>${btn('Παίξε online','onlineMenu()')}</div>
@@ -70,25 +70,25 @@ function modePanel(){
   <div class="nav col">${btn('Κλείσιμο','menu()','gr')}</div>`,'duoscr');
 }
 function offlineModes(){
-  show(`<h2>Offline</h2><p class="sub">Διαλεξε τον τροπο παιχνιδιου.</p>
+  show(`<h2>Offline</h2><p class="sub">Διάλεξε τον τρόπο παιχνιδιού.</p>
   <div class="duo">
     <div class="card"><h3>Ζωγράφισε τη λέξη</h3><p class="sub">Ένας παίκτης ζωγραφίζει τη λέξη και μετά δίνει τη συσκευή στους υπόλοιπους για να τη βρουν.</p>${btn('Ξεκίνα','soloSetup1()')}</div>
-    <div class="card"><h3>Λεξομαχία 60΄΄</h3><p class="sub">Ένας παίκτης βλέπει μια κρυφή λέξη, τη ζωγραφίζει, και η ομάδα του πρέπει να βρει τις περισσότερες μέσα σε 1 λεπτό.</p>${btn('Ξεκίνα','teamSetup1()')}</div>
+    <div class="card"><h3>Λεξομαχία 60″</h3><p class="sub">Ένας παίκτης βλέπει μια κρυφή λέξη, τη ζωγραφίζει, και η ομάδα του πρέπει να βρει τις περισσότερες μέσα σε 1 λεπτό.</p>${btn('Ξεκίνα','teamSetup1()')}</div>
   </div>
   <div class="nav col">${btn('Πίσω','modePanel()','gr')}</div>`,'duoscr');
 }
 function instructions(){
-  show(`<h2>Οδηγίες Παιχνιδιού</h2>
-  <h3 class="red">Ζωγράφισε τη λέξη</h3><ol><li>Ο παιχτης ζωγραφίζει την κρυφή λέξη.</li><li>Μόλις τελειώσει, δίνει τη συσκευή στους υπόλοιπους παίκτες.</li><li>Οι παίκτες προσπαθούν να μαντέψουν τη λέξη από τη ζωγραφιά.</li></ol>
-  <h3 class="red">Λεξομαχία 60΄΄</h3><ol><li>Ο παιχτης ζωγραφίζει τις κρυφές λέξεις.</li><li>Παράλληλα δείχνει τη συσκευή στους υπόλοιπους παίκτες, χωρίς να δουν την λέξη.</li><li>Οι παίκτες προσπαθούν να μαντέψουν τις λέξεις από τις ζωγραφιές μέσα σε 1 λεπτό.</li></ol>
+  show(`<h2>Οδηγίες παιχνιδιού</h2>
+  <h3 class="red">Ζωγράφισε τη λέξη</h3><ol><li>Ο παίκτης ζωγραφίζει την κρυφή λέξη.</li><li>Μόλις τελειώσει, δίνει τη συσκευή στους υπόλοιπους παίκτες.</li><li>Οι παίκτες προσπαθούν να μαντέψουν τη λέξη από τη ζωγραφιά.</li></ol>
+  <h3 class="red">Λεξομαχία 60″</h3><ol><li>Ο παίκτης ζωγραφίζει τις κρυφές λέξεις.</li><li>Παράλληλα δείχνει τη συσκευή στους υπόλοιπους παίκτες, χωρίς να δουν τη λέξη.</li><li>Οι παίκτες προσπαθούν να μαντέψουν τις λέξεις από τις ζωγραφιές μέσα σε 1 λεπτό.</li></ol>
   <div class="nav col">${btn('Κλείσιμο','menu()')}</div>`);
 }
 
 // ====== Ρυθμίσεις ======
 function soloSetup1(){
   S.mode='solo';
-  show(`<h2>Αριθμός παιχτών</h2><p class="sub">Διαλεξε τον αριθμο των παιχτων που θα παιξουν (2-20).</p>${countPanel('pc',S.players)}
-  <h2>Χρόνος γύρου</h2><p class="sub">Διαλεξε τον χρονο που θα εχει ο καθε παιχτης στη διαθεση του.</p>${timeBoxes()}
+  show(`<h2>Αριθμός παικτών</h2><p class="sub">Διάλεξε τον αριθμό των παικτών που θα παίξουν (2-20).</p>${countPanel('pc',S.players)}
+  <h2>Χρόνος γύρου</h2><p class="sub">Διάλεξε τον χρόνο που θα έχει ο κάθε παίκτης στη διάθεσή του.</p>${timeBoxes()}
   ${nav('offlineModes()','soloSetup2()')}`);
 }
 function nameFields(n,pool,ph){
@@ -99,7 +99,7 @@ function readNames(pool){
   const u=new Set(); return [...document.querySelectorAll('.nm')].map(e=>e.value.trim()).map(v=>{ if(v){u.add(v);return v;} const f=pool.filter(x=>!u.has(x)); const r=f.length?f[Math.random()*f.length|0]:'Παίκτης'+(100+Math.random()*900|0); u.add(r); return r; });
 }
 function soloSetup2(){
-  show(`<h2>Όνομα παιχτών</h2><p class="sub">Βάλε τα ονόματα που θες ή και όχι... τότε θα δοθούν τυχαία ονόματα.</p>
+  show(`<h2>Ονόματα παικτών</h2><p class="sub">Γράψε τα ονόματα που θέλεις ή άφησέ τα κενά και θα δοθούν τυχαία ονόματα.</p>
   <div class="names">${nameFields(S.players,SOLO_NAMES,'παίκτη')}</div>
   ${nav('soloSetup1()',"S.names=readNames(SOLO_NAMES);catSetup('solo')")}`);
 }
@@ -108,7 +108,7 @@ function tiles(mode){
   const t=(k,on)=>`<div class="tile ${on?'on':''}" onclick="toggleCat('${k}','${mode}')">${k==='*'?'':iconHtml(k)}${k==='*'?'Όλα':k}</div>`;
   return `<div class="tiles">${t('*',all)}${cats.map(c=>t(c,S.cats.includes(c))).join('')}</div>`;
 }
-const catHead = `<h2>Κατηγορίες λέξεων</h2><p class="sub">Διάλεξε τις κατηγορίες από τις οποίες θες να εμφανίζονται λέξεις. Αν δεν διαλέξεις καμία, θα εμφανίζονται λέξεις από όλες.</p>`;
+const catHead = `<h2>Κατηγορίες λέξεων</h2><p class="sub">Διάλεξε τις κατηγορίες από τις οποίες θέλεις να εμφανίζονται λέξεις. Αν δεν διαλέξεις καμία, θα εμφανίζονται λέξεις από όλες.</p>`;
 function catSetup(mode){ show(`${catHead}${tiles('solo')}${nav('soloSetup2()','startSolo()','Παίξε')}`,'catscr'); }
 function toggleCat(c,mode){
   const cats=Object.keys(WORDS);
@@ -118,23 +118,25 @@ function toggleCat(c,mode){
 }
 function teamSetup1(){
   S.mode='team';
-  show(`<h2>Αριθμός ομάδων</h2><p class="sub">Διαλεξε τον αριθμο των παιχτων/ομαδων που θα παιξουν (2-20).</p>${countPanel('tc',S.teams)}
+  show(`<h2>Αριθμός ομάδων</h2><p class="sub">Διάλεξε τον αριθμό των ομάδων που θα παίξουν (2-20).</p>${countPanel('tc',S.teams)}
   ${catHead}${tiles('team')}${nav('offlineModes()','teamNames()')}`,'catscr');
 }
 function teamNames(){
-  show(`<h2>Ονόματα ομάδων</h2><p class="sub">Βάλε τα ονόματα που θες ή και όχι... τότε θα δοθούν τυχαία ονόματα.</p>
+  show(`<h2>Ονόματα ομάδων</h2><p class="sub">Γράψε τα ονόματα που θέλεις ή άφησέ τα κενά και θα δοθούν τυχαία ονόματα.</p>
   <div class="names">${nameFields(S.teams,TEAM_NAMES,'ομάδας')}</div>
   ${nav('teamSetup1()','startTeams(readNames(TEAM_NAMES))','Παίξε')}`);
 }
 
 // ====== Εργαλεία ζωγραφικής ======
-const tool = {eraser:false, color:'#000', r:15};
+const tool = {eraser:false, color:'#000000', r:15};
+const COLORS=[['#000000','Μαύρο'],['#e03131','Κόκκινο'],['#1c7ed6','Μπλε'],['#2f9e44','Πράσινο'],['#f59f00','Πορτοκαλί']];   // 5 χρώματα
 const SIZES=[6,15,32], DOTS=['.45em','.8em','1.25em'];   // μικρό / μεσαίο / μεγάλο πινέλο
 function toolbar(){
   return `<button class="sm ${!tool.eraser?'on':''}" onclick="setTool('brush')">Μολύβι</button><button class="sm ${tool.eraser?'on':''}" onclick="setTool('eraser')">Σβήστρα</button><button class="sm" onclick="clearCanvas()">Καθάρισμα</button>
+  <div class="sizes colors">${COLORS.map(([c,n])=>`<button class="sm sw ${!tool.eraser&&tool.color===c?'on':''}" onclick="setTool('color','${c}')" aria-label="${n}" title="${n}"><i class="dot" style="--d:1.1em;background:${c}"></i></button>`).join('')}</div>
   <div class="sizes">${SIZES.map((r,i)=>`<button class="sm size ${tool.r===r?'on':''}" onclick="setTool('size',${r})" aria-label="Μέγεθος ${i+1}"><i class="dot" style="--d:${DOTS[i]}"></i></button>`).join('')}</div>`;
 }
-function setTool(k,v){ if(k==='size') tool.r=v; else tool.eraser=(k==='eraser'); const t=$('#tools'); if(t) t.innerHTML=toolbar(); }
+function setTool(k,v){ if(k==='size') tool.r=v; else if(k==='color'){ tool.color=v; tool.eraser=false; } else tool.eraser=(k==='eraser'); const t=$('#tools'); if(t) t.innerHTML=toolbar(); }
 
 // ====== Καμβάς ζωγραφικής ======
 function drawSeg(x,s){ // ένα κομμάτι γραμμής (χρησιμοποιείται και για τη ζωντανή μετάδοση online)
@@ -160,7 +162,7 @@ function snapshot(){ // ζωγραφιά πάνω σε λευκό φόντο
 function openPause(){
   paused=true;
   const o=document.createElement('div'); o.className='ov'; o.id='ov';
-  o.innerHTML=`<h2>Παυση</h2>${btn('Συνεχεια','closePause()','gr')}${btn('Εξοδος','menu()','gr')}`;
+  o.innerHTML=`<h2>Παύση</h2>${btn('Συνέχεια','closePause()','gr')}${btn('Έξοδος','menu()','gr')}`;
   document.body.appendChild(o);
 }
 function closePause(){ $('#ov')?.remove(); paused=false; }
@@ -174,7 +176,7 @@ function startSolo(){
 function startRound(){
   G.word=randomWord(); G.firstCorrect=false;
   const p=G.players[G.painter];
-  show(`<h2>${esc(p.name)}, σειρά σου να δείξεις το ταλέντο που έχεις στην ζωγραφική!</h2>
+  show(`<h2>${esc(p.name)}, σειρά σου να δείξεις το ταλέντο που έχεις στη ζωγραφική!</h2>
   <div class="mid"><div class="scratch"><span>${esc(G.word)}</span><canvas id="sc" width="908" height="316"></canvas></div></div>
   <div class="nav col">${btn('Ζωγράφισε','startDrawing()','ye')}</div>`,'bluescr');
   initScratch();
@@ -206,13 +208,13 @@ function endDrawing(){
 function nextGuesser(){
   if(G.gi>=G.order.length) return showScores();
   const g=G.players[G.order[G.gi]];
-  show(`<h2>${esc(g.name)}, θα καταφέρεις να βρεις την λέξη από την ζωγραφιά?</h2><div class="mid"></div>
+  show(`<h2>${esc(g.name)}, θα καταφέρεις να βρεις τη λέξη από τη ζωγραφιά;</h2><div class="mid"></div>
   <div class="nav col">${btn('Ξεκίνα','startGuess()','ye')}</div>`,'bluescr');
 }
 function startGuess(){
   show(`<div class="play">${hd()}<div class="board ${G.pt?'pt':''}"><img src="${G.img}" alt="Ζωγραφιά"></div>
   <div class="ctl"><div class="fb" id="fb"></div><div class="rr">${btn('Υποβολή','submitGuess()','ye')}</div>
-  <input type="text" class="plain" id="gi" placeholder="Γράψε την απάντηση σου..." autocomplete="off"></div></div>`,'wide');
+  <input type="text" class="plain" id="gi" placeholder="Γράψε την απάντησή σου..." autocomplete="off"></div></div>`,'wide');
   $('#gi').addEventListener('keydown',e=>{ if(e.key==='Enter') submitGuess(); });
   timer.start(S.guessTime, ()=>{ G.gi++; nextGuesser(); });
 }
@@ -233,7 +235,7 @@ function showScores(){
   const last=G.painter===G.players.length-1;
   show(`<h2>Βαθμολογία</h2><p class="sub">Η λέξη ήταν: <b>${esc(G.word)}</b></p>
   <div class="list">${scoreRows(G.players)}</div>
-  <div class="nav col">${btn(last?'Παίξε Ξανά':'Επόμενος Γύρος',last?'menu()':'nextPainter()')}</div>`);
+  <div class="nav col">${btn(last?'Παίξε ξανά':'Επόμενος γύρος',last?'menu()':'nextPainter()')}</div>`);
 }
 function nextPainter(){ G.painter=(G.painter+1)%G.players.length; startRound(); }
 
@@ -259,7 +261,7 @@ function coverWord(c){ // WordCoverController
   clearTimeout(G.hide); G.covered=c;
   const wb=$('#wb'); if(!wb) return;
   wb.classList.toggle('cover',c); wb.textContent=c?'':G.word;
-  const b=$('#wbtn'); b.textContent=c?'Δείξε την λέξη':'Κρύψε την λέξη'; b.className=(c?'gr':'ye')+' wide';
+  const b=$('#wbtn'); b.textContent=c?'Δείξε τη λέξη':'Κρύψε τη λέξη'; b.className=(c?'gr':'ye')+' wide';
   if(!c) G.hide=setTimeout(()=>coverWord(true),2000);
 }
 function toggleWord(){
