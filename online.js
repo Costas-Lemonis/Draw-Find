@@ -224,15 +224,15 @@ function clientMsg(m){
   if(T==='round'){ C.mode='solo'; return roundView(m); }
   if(T==='tround'){ C.mode='team'; C.team=m.team; C.members=m.members; C.teams=m.teams; return teamRoundView(m); }
   if(T==='wipe'){ const c=$('#cv'); if(c) c.getContext('2d').clearRect(0,0,c.width,c.height); return; }
-  if(T==='tfound'){ C.teams=m.teams; logLine(`${esc(m.name)} βρήκε τη λέξη!`); const f=$('#fb'); if(f) f.textContent='Σωστό! Επόμενη λέξη...'; const i=$('#gi'); if(i) i.value=''; return; }
+  if(T==='tfound'){ C.teams=m.teams; const f=$('#fb'); if(f) f.textContent='Σωστό! Επόμενη λέξη...'; const i=$('#gi'); if(i) i.value=''; return; }
   if(T==='tend'){ C.teams=m.teams; return endTeamView(m); }
   if(T==='word'){ const w=$('#ow'); if(w) w.textContent=m.word; C.word=m.word; return; }
   if(T==='s'){ const c=$('#cv'); if(c&&!isPainter()) drawSeg(c.getContext('2d'),m); return; }
   if(T==='clear'){ const c=$('#cv'); if(c&&!isPainter()) c.getContext('2d').clearRect(0,0,c.width,c.height); return; }
   if(T==='tick'){ C.left=m.left; return tickView(); }
   if(T==='wrong'){ const f=$('#fb'); if(f) f.textContent='Λάθος! Προσπάθησε ξανά.'; return; }
-  if(T==='found'){ C.players=m.players; logLine(`${esc(m.name)} βρήκε τη λέξη!`);
-    if(m.id===myId){ const f=$('#fb'); if(f) f.textContent=`Σωστό! +${m.pts}`; const i=$('#gi'); if(i) i.disabled=true; } return; }
+  if(T==='found'){ C.players=m.players;
+    if(m.id===myId){ const f=$('#fb'); if(f) f.textContent='Σωστό!'; const i=$('#gi'); if(i) i.disabled=true; } return; }
   if(T==='end'){ C.players=m.players; return endView(m); }
   if(T==='final'){ C.players=m.players; C.teams=m.teams; C.mode=m.teams?'team':'solo'; return finalView(); }
 }
@@ -287,9 +287,8 @@ function roundView(m){
   <div class="board"><canvas id="cv" width="1024" height="728"></canvas></div>
   <div class="ctl"><p class="sub">${me?'Σειρά σου! Ζωγράφισε: <b id="ow">...</b>':`${esc(m.painterName)} ζωγραφίζει...`}</p>
   ${me?`<div class="tools" id="tools">${toolbar()}</div>${btn('Ολοκλήρωση γύρου',"olSend({t:'done'})",'gr wide')}`
-  :`<div class="fb" id="fb"></div><div class="rr">${btn('Υποβολή','olGuess()','ye')}</div><input type="text" class="plain" id="gi" placeholder="Γράψε την απάντησή σου..." autocomplete="off">`}
-  <div class="sub" id="log" style="max-height:90px;overflow:auto"></div></div></div>`,'wide');
-  if(me){ initCanvas(); window.onSeg=s=>olSend(s); window.onClear=()=>olSend({t:'clear'}); }
+  :`<div class="fb" id="fb"></div><div class="rr">${btn('Υποβολή','olGuess()','ye')}</div><input type="text" class="plain" id="gi" placeholder="Γράψε την απάντησή σου..." autocomplete="off">`}</div></div>`,me?'wide paintscr':'wide');
+  if(me){ initCanvas(); rotHint(); window.onSeg=s=>olSend(s); window.onClear=()=>olSend({t:'clear'}); }
   else { window.onSeg=window.onClear=null; $('#gi').addEventListener('keydown',e=>{ if(e.key==='Enter') olGuess(); }); }
   tickView();
 }
@@ -298,7 +297,6 @@ function olSend(m){
   else net.send('host',m);
 }
 function olGuess(){ const i=$('#gi'); const v=i.value.trim(); if(!v||i.disabled) return; if(isHost) (R.mode==='team'?teamGuess:hostGuess)('host',v); else net.send('host',{t:'guess',text:v}); i.value=''; }
-function logLine(h){ const l=$('#log'); if(l){ l.insertAdjacentHTML('afterbegin',`<div>${h}</div>`); } }
 function endView(m){
   const o=document.createElement('div'); o.className='ov'; o.id='ov';
   o.innerHTML=`<div class="card" style="gap:8px"><h2>Η λέξη ήταν: ${esc(m.word)}</h2>${scoreRows(m.players)}<p class="sub">Ο επόμενος γύρος ξεκινά σε λίγο...</p></div>`;
@@ -317,9 +315,8 @@ function teamRoundView(m){
   <div class="ctl"><p class="sub">Παίζει η ομάδα: <b>${esc(m.teamName)}</b><br>${me?'Ζωγραφίζεις εσύ!':esc(m.painterName)+' ζωγραφίζει'}</p>
   ${me?`<div class="wordbox" id="ow">...</div><div class="tools" id="tools">${toolbar()}</div>${btn('Πάσο',"olSend({t:'pass'})",'gr wide')}`
   :mate?`<div class="fb" id="fb"></div><div class="rr">${btn('Υποβολή','olGuess()','ye')}</div><input type="text" class="plain" id="gi" placeholder="Γράψε την απάντησή σου..." autocomplete="off">`
-  :`<p class="sub">Παίζει η άλλη ομάδα. Περίμενε τη σειρά σου!</p>`}
-  <div class="sub" id="log" style="max-height:90px;overflow:auto"></div></div></div>`,'wide');
-  if(me){ initCanvas(); window.onSeg=s=>olSend(s); window.onClear=()=>olSend({t:'clear'}); }
+  :`<p class="sub">Παίζει η άλλη ομάδα. Περίμενε τη σειρά σου!</p>`}</div></div>`,me?'wide paintscr':'wide');
+  if(me){ initCanvas(); rotHint(); window.onSeg=s=>olSend(s); window.onClear=()=>olSend({t:'clear'}); }
   else { window.onSeg=window.onClear=null; const i=$('#gi'); if(i) i.addEventListener('keydown',e=>{ if(e.key==='Enter') olGuess(); }); }
   tickView();
 }

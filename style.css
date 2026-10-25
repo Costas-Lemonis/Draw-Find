@@ -202,3 +202,36 @@ body.nofit #app{height:100dvh;min-height:0;align-items:stretch;overflow:hidden}
 /* χρώματα πινέλου */
 button.sw{display:inline-flex;align-items:center;justify-content:center;min-width:2.4em;padding-top:.15em}
 .dot{border:.08em solid rgba(0,0,0,.45)}
+
+/* ====== Κινητά: η οθόνη του ζωγράφου είναι πάντα οριζόντια ====== */
+/* α) κινητό ήδη οριζόντιο (ή χαμηλό παράθυρο): καμβάς αριστερά, χειριστήρια δεξιά, ό,τι κι αν είναι το πλάτος */
+@media (orientation:landscape) and (max-height:520px){
+  .play{grid-template-columns:minmax(0,auto) 16em;grid-template-rows:auto 1fr;grid-template-areas:"bd hd" "bd ct";justify-content:center;column-gap:.8em;align-items:start}
+  .board,.board.pt{height:auto;width:min(calc(100dvw - 18.2em),calc((100dvh - 1.4em)*1.408));max-width:none;justify-self:start;aspect-ratio:915/650}
+  .board.pt::after{background-image:url(assets/ui/frame_land.png)}
+  .ctl{gap:.3em}
+  .ctl button.sm{font-size:.78em;border-width:.6em;border-image-width:.6em;padding:0 .15em .1em 0}
+  .ctl .tools{gap:.3em}.ctl .sizes{gap:.3em}
+  .ctl button.sw,.ctl button.size{min-width:2em}
+  .ctl button.wide,.ctl .r button{font-size:1em;border-width:.6em;border-image-width:.6em;padding:0 .2em .1em}
+  .wordbox{min-height:2em;font-size:1.1em;border-width:.6em;border-image-width:.6em;padding:0 .3em .1em}
+  .hd{min-height:1.8em}
+}
+/* β) κινητό όρθιο: γυρίζουμε όλη την οθόνη 90° ώστε να φαίνεται οριζόντια και ο παίκτης γυρίζει το κινητό του */
+@media (orientation:portrait) and (pointer:coarse) and (max-width:600px){
+  body.rot{font-size:15px;overflow:hidden}
+  body.rot #app{position:fixed;top:0;left:100%;width:100dvh;height:100dvw;min-height:0;padding:.7em;transform-origin:0 0;transform:rotate(90deg)}
+  body.rot .scr{max-width:none;width:100%;height:100%;min-height:0}
+  body.rot .play{grid-template-columns:minmax(0,auto) 16em;grid-template-rows:auto 1fr;grid-template-areas:"bd hd" "bd ct";justify-content:center;column-gap:.8em;align-items:start}
+  body.rot .board,body.rot .board.pt{height:auto;width:min(calc(100dvh - 18.2em),calc((100dvw - 1.4em)*1.408));max-width:none;justify-self:start;aspect-ratio:915/650}
+  body.rot .board.pt::after{background-image:url(assets/ui/frame_land.png)}
+  body.rot .ctl{gap:.3em}
+  body.rot .ctl button.sm{font-size:.78em;border-width:.6em;border-image-width:.6em;padding:0 .15em .1em 0}
+  body.rot .ctl .tools{gap:.3em}.ctl .sizes{gap:.3em}
+  body.rot .ctl button.sw,.ctl button.size{min-width:2em}
+  body.rot .ctl button.wide,.ctl .r button{font-size:1em;border-width:.6em;border-image-width:.6em;padding:0 .2em .1em}
+  body.rot .wordbox{min-height:2em;font-size:1.1em;border-width:.6em;border-image-width:.6em;padding:0 .3em .1em}
+  body.rot .hd{min-height:1.8em}
+  body.rot .ov{inset:auto;top:0;left:100%;width:100dvh;height:100dvw;transform-origin:0 0;transform:rotate(90deg)}
+}
+.rothint{position:absolute;left:50%;bottom:.5em;transform:translateX(-50%);background:#111;color:#fff;padding:.4em .9em;border-radius:.6em;font-size:.85em;pointer-events:none;z-index:5;white-space:nowrap}

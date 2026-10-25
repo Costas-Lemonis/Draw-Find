@@ -46,7 +46,7 @@ const timer = {t:0,total:0,run:false,h:0,cb:null,sel:'#tm',
 
 
 // ====== Βοηθητικά UI ======
-function show(html,cls=''){ document.body.classList.toggle('bluebg',cls.includes('bluescr')); document.body.classList.toggle('nofit',cls.includes('lobbyscr')); app.innerHTML=`<div class="scr ${cls}">${html}</div>`; window.scrollTo(0,0); }
+function show(html,cls=''){ document.body.classList.toggle('bluebg',cls.includes('bluescr')); document.body.classList.toggle('rot',cls.includes('paintscr')); document.body.classList.toggle('nofit',cls.includes('lobbyscr')); app.innerHTML=`<div class="scr ${cls}">${html}</div>`; window.scrollTo(0,0); }
 const btn = (label,fn,cls='bl') => `<button class="${cls}" onclick="${fn}">${label}</button>`;
 const nav = (back,next,nl='Επόμενο') => `<div class="nav">${btn('Πίσω',back,'gr')}${btn(nl,next,'bl')}</div>`;
 const pb = () => `<button class="pb" onclick="openPause()">Παύση</button>`;
@@ -143,9 +143,20 @@ function drawSeg(x,s){ // ένα κομμάτι γραμμής (χρησιμοπ
   x.globalCompositeOperation=s.e?'destination-out':'source-over'; x.strokeStyle=x.fillStyle=s.c; x.lineWidth=s.r*2; x.lineCap=x.lineJoin='round'; x.beginPath();
   if(s.a[0]===s.b[0]&&s.a[1]===s.b[1]){ x.arc(s.a[0],s.a[1],s.r,0,7); x.fill(); } else { x.moveTo(s.a[0],s.a[1]); x.lineTo(s.b[0],s.b[1]); x.stroke(); }
 }
+// Στα κινητά που κρατιούνται όρθια η οθόνη του ζωγράφου γυρίζει 90° (οριζόντια διάταξη). Εδώ μετατρέπονται οι συντεταγμένες του δαχτύλου.
+const rotMode = () => document.body.classList.contains('rot') && matchMedia('(orientation:portrait) and (pointer:coarse) and (max-width:600px)').matches;
+function canvasPoint(c,e){
+  const r=c.getBoundingClientRect(), k=v=>Math.round(v*10)/10;
+  if(rotMode()) return [k((e.clientY-r.top)*c.width/r.height), k((r.right-e.clientX)*c.height/r.width)];
+  return [k((e.clientX-r.left)*c.width/r.width), k((e.clientY-r.top)*c.height/r.height)];
+}
+function rotHint(){
+  if(!rotMode()) return; const d=document.createElement('div'); d.className='rothint'; d.textContent='Γύρισε το κινητό οριζόντια για να ζωγραφίσεις.';
+  const a=document.getElementById('app'); a.appendChild(d); setTimeout(()=>d.remove(),3500);
+}
 function initCanvas(){
   const c=$('#cv'), x=c.getContext('2d'); let down=false, last=null;
-  const pt=e=>{const r=c.getBoundingClientRect();return[Math.round((e.clientX-r.left)*c.width/r.width*10)/10,Math.round((e.clientY-r.top)*c.height/r.height*10)/10]};
+  const pt=e=>canvasPoint(c,e);
   const seg=(a,b)=>{ const s={t:'s',a,b,c:tool.color,r:tool.r,e:tool.eraser}; drawSeg(x,s); if(window.onSeg) window.onSeg(s); };
   c.onpointerdown=e=>{ if(paused) return; down=true; c.setPointerCapture(e.pointerId); last=pt(e); seg(last,last); };
   c.onpointermove=e=>{ if(!down||paused) return; const p=pt(e); seg(last,p); last=p; };
@@ -192,13 +203,13 @@ function initScratch(){ // ScratchReveal: ξύσε για να δεις τη λ�
   c.onpointermove=e=>{ if(!down||paused) return; erase(e); if(++moves%6===0) check(); };
   c.onpointerup=()=>{ down=false; check(); };
 }
-const portrait = () => matchMedia('(max-aspect-ratio: 1/1)').matches;
+const portrait = () => matchMedia('(max-aspect-ratio: 1/1)').matches && !matchMedia('(pointer:coarse)').matches;   // στα κινητά η οθόνη ζωγραφικής είναι πάντα οριζόντια
 const hd = () => `<div class="hd"><span class="timer" id="tm"></span>${pb()}</div>`;
 function startDrawing(){
   G.pt=portrait();
   show(`<div class="play">${hd()}<div class="board ${G.pt?'pt':''}"><canvas id="cv" width="${G.pt?768:1024}" height="${G.pt?1079:728}"></canvas></div>
-  <div class="ctl"><div class="tools" id="tools">${toolbar()}</div>${btn('Ολοκλήρωση γύρου','endDrawing()','gr wide')}</div></div>`,'wide');
-  initCanvas(); timer.start(S.drawTime, endDrawing);
+  <div class="ctl"><div class="tools" id="tools">${toolbar()}</div>${btn('Ολοκλήρωση γύρου','endDrawing()','gr wide')}</div></div>`,'wide paintscr');
+  initCanvas(); rotHint(); timer.start(S.drawTime, endDrawing);
 }
 function endDrawing(){
   timer.stop(); G.img=snapshot();
@@ -254,8 +265,8 @@ function teamTurn(){
 function painterPhase(){
   show(`<div class="play">${hd().replace('></span>','>01:00</span>')}<div class="board"><canvas id="cv" width="1024" height="728"></canvas></div>
   <div class="ctl"><div class="wordbox cover" id="wb"></div><button class="gr wide" id="wbtn" onclick="toggleWord()"></button>
-  <div class="tools" id="tools">${toolbar()}</div><div class="r">${btn('Πάσο','teamPass()','gr')}${btn('Σωστό','teamCorrect()','gr')}</div></div></div>`,'wide');
-  initCanvas(); coverWord(true);
+  <div class="tools" id="tools">${toolbar()}</div><div class="r">${btn('Πάσο','teamPass()','gr')}${btn('Σωστό','teamCorrect()','gr')}</div></div></div>`,'wide paintscr');
+  initCanvas(); rotHint(); coverWord(true);
 }
 function coverWord(c){ // WordCoverController
   clearTimeout(G.hide); G.covered=c;
